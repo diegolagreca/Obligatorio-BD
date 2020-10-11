@@ -197,7 +197,7 @@ VALUES
 	(9, 4),
 	-- u: mafalda		r: Supervisor Operaciones
 	(9, 5);
--- u: mafalda		r: Operador
+	-- u: mafalda		r: Operador
 
 INSERT INTO rol_tiene_permiso
 	(id_rol, id_permiso)
