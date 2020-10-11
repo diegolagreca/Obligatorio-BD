@@ -1,27 +1,33 @@
 DROP TABLE IF EXISTS usuario_tiene_rol;
 DROP TABLE IF EXISTS rol_tiene_permiso;
 DROP TABLE IF EXISTS solicitudes_aprobacion;
-DROP TABLE IF EXISTS registro_usuarios;
-DROP TABLE IF EXISTS registro_personas;
-DROP TABLE IF EXISTS registro_roles;
-DROP TABLE IF EXISTS registro_permisos;
-DROP TABLE IF EXISTS registro_modulos;
 DROP TABLE IF EXISTS registros;
--- DROP TABLE IF EXISTS roles;
--- DROP TABLE IF EXISTS permisos;
--- DROP TABLE IF EXISTS usuarios;
--- DROP TABLE IF EXISTS personas;
--- DROP TABLE IF EXISTS modulos;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS permisos;
+DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS personas;
+DROP TABLE IF EXISTS aplicaciones;
+DROP TABLE IF EXISTS menus;
 
-CREATE TABLE modulos
+CREATE TABLE aplicaciones
 (
-	id_modulo SERIAL PRIMARY KEY,
-	nombre_modulo VARCHAR(255)
+	id_aplicacion SERIAL PRIMARY KEY,
+	nombre_aplicacion VARCHAR(255)
+);
+
+CREATE TABLE menus
+(
+	id_menu SERIAL PRIMARY KEY,
+	id_aplicacion INT NOT NULL,
+	estado CHAR NOT NULL,
+	nombre_menu VARCHAR(255),
+	FOREIGN KEY (id_aplicacion) REFERENCES aplicaciones(id_aplicacion)
 );
 
 CREATE TABLE roles
 (
 	id_rol SERIAL PRIMARY KEY,
+	estado CHAR NOT NULL,
 	nombre_rol VARCHAR(255) NOT NULL
 );
 
@@ -29,8 +35,9 @@ CREATE TABLE permisos
 (
 	id_permiso SERIAL PRIMARY KEY,
 	nombre_permiso VARCHAR(255) NOT NULL,
-	id_modulo INT NOT NULL,
-	FOREIGN KEY (id_modulo) REFERENCES modulos(id_modulo)
+	id_menu INT NOT NULL,
+	estado CHAR NOT NULL,
+	FOREIGN KEY (id_menu) REFERENCES menus(id_menu)
 );
 
 CREATE TABLE personas
@@ -41,6 +48,7 @@ CREATE TABLE personas
 	direccion VARCHAR(255),
 	telefono INT,
 	correo VARCHAR(255),
+	estado CHAR NOT NULL,
 	PRIMARY KEY (documento)
 );
 
@@ -50,6 +58,7 @@ CREATE TABLE usuarios
 	usuario VARCHAR(255) NOT NULL,
 	contraseña VARCHAR(255) NOT NULL,
 	documento INT NOT NULL,
+	estado CHAR NOT NULL,
 	FOREIGN KEY (documento) REFERENCES personas(documento)
 );
 
@@ -58,6 +67,8 @@ CREATE TABLE registros
 	id_registro SERIAL PRIMARY KEY,
 	fecha_creacion TIMESTAMP,
 	id_usuario INT NOT NULL,
+	estado CHAR NOT NULL,
+	tipo VARCHAR(255) NOT NULL,
 	FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
 	descripcion VARCHAR (255)
 );
@@ -88,59 +99,14 @@ CREATE TABLE solicitudes_aprobacion
 	FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
 	FOREIGN KEY (id_registro) REFERENCES registros(id_registro),
 	fecha_aprobacion TIMESTAMP,
-	estado CHAR,
+	estado CHAR NOT NULL,
 	PRIMARY KEY(id_registro, id_solicitud_aprobacion)
-);
-
-CREATE TABLE registro_usuarios
-(
-	id_registro INT,
-	id_usuario INT,
-	FOREIGN KEY (id_registro) REFERENCES registros(id_registro),
-	FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
-	PRIMARY KEY (id_registro, id_usuario)
-);
-
-CREATE TABLE registro_personas
-(
-	id_registro INT,
-	documento_persona INT,
-	FOREIGN KEY (id_registro) REFERENCES registros(id_registro),
-	FOREIGN KEY (documento_persona) REFERENCES personas(documento),
-	PRIMARY KEY (id_registro, documento_persona)
-);
-
-CREATE TABLE registro_roles
-(
-	id_registro INT,
-	id_rol INT,
-	FOREIGN KEY (id_rol) REFERENCES roles(id_rol),
-	FOREIGN KEY (id_registro) REFERENCES registros(id_registro),
-	PRIMARY KEY (id_registro, id_rol)
-);
-
-CREATE TABLE registro_permisos
-(
-	id_registro INT,
-	id_permiso INT,
-	FOREIGN KEY (id_permiso) REFERENCES permisos(id_permiso),
-	FOREIGN KEY (id_registro) REFERENCES registros(id_registro),
-	PRIMARY KEY (id_registro, id_permiso)
-);
-
-CREATE TABLE registro_modulos
-(
-	id_registro INT,
-	id_modulo INT,
-	FOREIGN KEY (id_modulo) REFERENCES modulos(id_modulo),
-	FOREIGN KEY (id_registro) REFERENCES registros(id_registro),
-	PRIMARY KEY (id_registro, id_modulo)
 );
 
 -- Inserts para testear
 
-INSERT INTO modulos
-	(nombre_modulo)
+INSERT INTO aplicaciones
+	(nombre_aplicacion)
 VALUES
 	('Administración del Sistema'),
 	('Administración de Usuarios'),
@@ -157,7 +123,7 @@ VALUES
 	('Operador');
 
 INSERT INTO permisos
-	(nombre_permiso, id_modulo)
+	(nombre_permiso, id_aplicacion)
 VALUES
 	('Configuración del Sistema', 1),
 	('Alta Usuarios', 2),
@@ -178,7 +144,7 @@ VALUES
 	(55555555, 'Mafalda', 'Muchos Roles', 'Falso 555', 08005555, 'mafalda@correo.com'),
 	(66666666, 'Un', 'Inutil', 'Falso 000', 08000000, 'uninutil@correo.com'),
 	(77777777, 'Una', 'Inutil', 'Falso 000', 08000001, 'unainutil@correo.com');
-	
+
 INSERT INTO usuarios
 	(usuario, contraseña, documento)
 VALUES
@@ -195,37 +161,64 @@ VALUES
 INSERT INTO usuario_tiene_rol
 	(id_usuario, id_rol)
 VALUES
-	(1, 1), -- u: pepitoAdmin 	r: Administrador
-	(2, 2), -- u: pepitoMesa	r: Mesa de Ayuda
-	(3, 3), -- u: pepitoConta 	r: Contador
-	(4, 4), -- u: pepitoSuper	r: Supervisor Operaciones
-	(5, 5), -- u: pepitoOper	r: Operador
-	(6, 2), -- u: pepita		r: Mesa de Ayuda
-	(7, 3), -- u: robertito		r: Contador
-	(8, 4), -- u: robertita		r: Supervisor Operaciones
-	(8, 5), -- u: robertita		r: Operador
-	(9, 1), -- u: mafalda		r: Administrador
-	(9, 2), -- u: mafalda		r: Mesa de Ayuda
-	(9, 3), -- u: mafalda		r: Contador
-	(9, 4), -- u: mafalda		r: Supervisor Operaciones
-	(9, 5); -- u: mafalda		r: Operador
+	(1, 1),
+	-- u: pepitoAdmin 	r: Administrador
+	(2, 2),
+	-- u: pepitoMesa	r: Mesa de Ayuda
+	(3, 3),
+	-- u: pepitoConta 	r: Contador
+	(4, 4),
+	-- u: pepitoSuper	r: Supervisor Operaciones
+	(5, 5),
+	-- u: pepitoOper	r: Operador
+	(6, 2),
+	-- u: pepita		r: Mesa de Ayuda
+	(7, 3),
+	-- u: robertito		r: Contador
+	(8, 4),
+	-- u: robertita		r: Supervisor Operaciones
+	(8, 5),
+	-- u: robertita		r: Operador
+	(9, 1),
+	-- u: mafalda		r: Administrador
+	(9, 2),
+	-- u: mafalda		r: Mesa de Ayuda
+	(9, 3),
+	-- u: mafalda		r: Contador
+	(9, 4),
+	-- u: mafalda		r: Supervisor Operaciones
+	(9, 5);
+-- u: mafalda		r: Operador
 
 INSERT INTO rol_tiene_permiso
 	(id_rol, id_permiso)
 VALUES
-	(1, 1), -- r: Administrador				p: Configuración del Sistema
-	(1, 2), -- r: Administrador				p: Alta Usuarios
-	(1, 3), -- r: Administrador				p: Baja Usuarios
-	(1, 4), -- r: Administrador				p: Modificar Usuarios
-	(1, 5), -- r: Administrador				p: Desbloquear Usuario
-	(1, 6), -- r: Administrador				p: Bloquear Usuario
-	(2, 2), -- r: Mesa de Ayuda				p: Alta Usuarios
-	(2, 5), -- r: Mesa de Ayuda				p: Desbloquear Usuario
-	(2, 6), -- r: Mesa de Ayuda				p: Bloquear Usuario
-	(3, 7), -- r: Contador					p: Desbloquear Usuario
-	(4, 5), -- r: Supervisor Operaciones 	p: Desbloquear Usuario
-	(4, 6), -- r: Supervisor Operaciones 	p: Bloquear Usuario
-	(4, 8), -- r: Supervisor Operaciones 	p: Operar
+	(1, 1),
+	-- r: Administrador				p: Configuración del Sistema
+	(1, 2),
+	-- r: Administrador				p: Alta Usuarios
+	(1, 3),
+	-- r: Administrador				p: Baja Usuarios
+	(1, 4),
+	-- r: Administrador				p: Modificar Usuarios
+	(1, 5),
+	-- r: Administrador				p: Desbloquear Usuario
+	(1, 6),
+	-- r: Administrador				p: Bloquear Usuario
+	(2, 2),
+	-- r: Mesa de Ayuda				p: Alta Usuarios
+	(2, 5),
+	-- r: Mesa de Ayuda				p: Desbloquear Usuario
+	(2, 6),
+	-- r: Mesa de Ayuda				p: Bloquear Usuario
+	(3, 7),
+	-- r: Contador					p: Desbloquear Usuario
+	(4, 5),
+	-- r: Supervisor Operaciones 	p: Desbloquear Usuario
+	(4, 6),
+	-- r: Supervisor Operaciones 	p: Bloquear Usuario
+	(4, 8),
+	-- r: Supervisor Operaciones 	p: Operar
 	(5, 8); -- r: Operador					p: Operar
 
 -- Consultas SQL Select para verificar datos
