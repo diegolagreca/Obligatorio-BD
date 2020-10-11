@@ -6,13 +6,14 @@ DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS permisos;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS personas;
-DROP TABLE IF EXISTS aplicaciones;
 DROP TABLE IF EXISTS menus;
+DROP TABLE IF EXISTS aplicaciones;
 
 CREATE TABLE aplicaciones
 (
 	id_aplicacion SERIAL PRIMARY KEY,
-	nombre_aplicacion VARCHAR(255)
+	nombre_aplicacion VARCHAR(255),
+	estado CHAR NOT NULL
 );
 
 CREATE TABLE menus
@@ -106,57 +107,65 @@ CREATE TABLE solicitudes_aprobacion
 -- Inserts para testear
 
 INSERT INTO aplicaciones
-	(nombre_aplicacion)
+	(nombre_aplicacion, estado)
 VALUES
-	('Administración del Sistema'),
-	('Administración de Usuarios'),
-	('Administración Contable'),
-	('Operaciones');
+	('Aplicación - App 1', 'A'),
+	('Aplicación - App 2', 'A'),
+	('Aplicación - App 3', 'A'),
+	('Aplicación - App 4', 'A');
 
-INSERT INTO roles
-	(nombre_rol)
+INSERT INTO menus
+	(id_aplicacion, nombre_menu, estado)
 VALUES
-	('Administrador'),
-	('Mesa de Ayuda'),
-	('Contador'),
-	('Supervisor Operaciones'),
-	('Operador');
+	(1, 'App 1 - Menú Principal', 'A'),
+	(1, 'App 1 - Menú de Gestión de Usuarios', 'A'),
+	(2, 'App 2 - Menú Contable', 'A'),
+	(3, 'App 3 - Menú de Operaciones', 'A');
+	
+INSERT INTO roles
+	(nombre_rol, estado)
+VALUES
+	('Administrador', 'A'),
+	('Mesa de Ayuda', 'A'),
+	('Contador', 'A'),
+	('Supervisor Operaciones', 'A'),
+	('Operador', 'A');
 
 INSERT INTO permisos
-	(nombre_permiso, id_aplicacion)
+	(nombre_permiso, id_menu, estado)
 VALUES
-	('Configuración del Sistema', 1),
-	('Alta Usuarios', 2),
-	('Baja Usuarios', 2),
-	('Modificar Usuarios', 2),
-	('Desbloquear Usuario', 2),
-	('Bloquear Usuario', 2),
-	('Asiento Contable', 3),
-	('Operar', 4);
+	('Configuración del Sistema', 1, 'A'),
+	('Alta Usuarios', 2, 'A'),
+	('Baja Usuarios', 2, 'A'),
+	('Modificar Usuarios', 2, 'A'),
+	('Desbloquear Usuario', 2, 'A'), 
+	('Bloquear Usuario', 2, 'A'),
+	('Asiento Contable', 3, 'A'),
+	('Operar', 4, 'A');
 
 INSERT INTO personas
-	(documento, nombre, apellido, direccion, telefono, correo)
+	(documento, nombre, apellido, direccion, telefono, correo, estado)
 VALUES
-	(11111111, 'Pepito', 'Muchos Usuarios', 'Falso 111', 08001111, 'pepito@correo.com'),
-	(22222222, 'Pepita', 'Mesera de Ayuda', 'Falso 222', 08002222, 'pepita@correo.com'),
-	(33333333, 'Robertito', 'El Contador', 'Falso 333', 08003333, 'robertito@correo.com'),
-	(44444444, 'Robertita', 'Supervisora de Operaciones', 'Falso 444', 08004444, 'robertita@correo.com'),
-	(55555555, 'Mafalda', 'Muchos Roles', 'Falso 555', 08005555, 'mafalda@correo.com'),
-	(66666666, 'Un', 'Inutil', 'Falso 000', 08000000, 'uninutil@correo.com'),
-	(77777777, 'Una', 'Inutil', 'Falso 000', 08000001, 'unainutil@correo.com');
+	(11111111, 'Pepito', 'Muchos Usuarios', 'Falso 111', 08001111, 'pepito@correo.com', 'A'),
+	(22222222, 'Pepita', 'Mesera de Ayuda', 'Falso 222', 08002222, 'pepita@correo.com', 'A'),
+	(33333333, 'Robertito', 'El Contador', 'Falso 333', 08003333, 'robertito@correo.com', 'A'),
+	(44444444, 'Robertita', 'Supervisora de Operaciones', 'Falso 444', 08004444, 'robertita@correo.com', 'A'),
+	(55555555, 'Mafalda', 'Muchos Roles', 'Falso 555', 08005555, 'mafalda@correo.com', 'A'),
+	(66666666, 'Un', 'Inutil', 'Falso 000', 08000000, 'uninutil@correo.com', 'A'),
+	(77777777, 'Una', 'Inutil', 'Falso 000', 08000001, 'unainutil@correo.com', 'A');
 
 INSERT INTO usuarios
-	(usuario, contraseña, documento)
+	(usuario, contraseña, documento, estado)
 VALUES
-	('pepitoAdmin', '1234', 11111111),
-	('pepitoMesa', '1234', 11111111),
-	('pepitoConta', '1234', 11111111),
-	('pepitoSuper', '1234', 11111111),
-	('pepitoOper', '1234', 11111111),
-	('pepita', '1234', 22222222),
-	('robertito', '1234', 33333333),
-	('robertita', '1234', 44444444),
-	('mafalda', '1234', 55555555);
+	('pepitoAdmin', '1234', 11111111, 'A'),
+	('pepitoMesa', '1234', 11111111, 'A'),
+	('pepitoConta', '1234', 11111111, 'A'),
+	('pepitoSuper', '1234', 11111111, 'A'),
+	('pepitoOper', '1234', 11111111, 'A'),
+	('pepita', '1234', 22222222, 'A'),
+	('robertito', '1234', 33333333, 'A'),
+	('robertita', '1234', 44444444, 'A'),
+	('mafalda', '1234', 55555555, 'A');
 
 INSERT INTO usuario_tiene_rol
 	(id_usuario, id_rol)
@@ -214,17 +223,11 @@ VALUES
 	(3, 7),
 	-- r: Contador					p: Desbloquear Usuario
 	(4, 5),
-	-- r: Supervisor Operaciones 	p: Desbloquear Usuario
+	-- r: Supervisor Operaciones 			p: Desbloquear Usuario
 	(4, 6),
-	-- r: Supervisor Operaciones 	p: Bloquear Usuario
+	-- r: Supervisor Operaciones 			p: Bloquear Usuario
 	(4, 8),
-	-- r: Supervisor Operaciones 	p: Operar
-	(5, 8); -- r: Operador					p: Operar
+	-- r: Supervisor Operaciones 			p: Operar
+	(5, 8);
+	-- r: Operador					p: Operar
 
--- Consultas SQL Select para verificar datos
-
--- select * from usuarios;
--- select * from personas;
--- select * from permisos;
--- select * from usuario_tiene_rol;
--- select * from rol_tiene_permiso;
