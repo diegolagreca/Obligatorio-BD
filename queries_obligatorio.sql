@@ -7,11 +7,11 @@ DROP TABLE IF EXISTS registro_roles;
 DROP TABLE IF EXISTS registro_permisos;
 DROP TABLE IF EXISTS registro_modulos;
 DROP TABLE IF EXISTS registros;
-DROP TABLE IF EXISTS roles;
-DROP TABLE IF EXISTS permisos;
-DROP TABLE IF EXISTS usuarios;
-DROP TABLE IF EXISTS personas;
-DROP TABLE IF EXISTS modulos;
+-- DROP TABLE IF EXISTS roles;
+-- DROP TABLE IF EXISTS permisos;
+-- DROP TABLE IF EXISTS usuarios;
+-- DROP TABLE IF EXISTS personas;
+-- DROP TABLE IF EXISTS modulos;
 
 CREATE TABLE modulos
 (
@@ -154,8 +154,7 @@ VALUES
 	('Mesa de Ayuda'),
 	('Contador'),
 	('Supervisor Operaciones'),
-	('Operador'),
-	('Invitado');
+	('Operador');
 
 INSERT INTO permisos
 	(nombre_permiso, id_modulo)
@@ -172,35 +171,67 @@ VALUES
 INSERT INTO personas
 	(documento, nombre, apellido, direccion, telefono, correo)
 VALUES
-	(11111111, 'Pepito', 'Rodriguez', 'Falso 123', 08006666, 'pepito@correo.com'),
-	(22222222, 'Pepita', 'Rodriguez', 'Falso 122', 08005555, 'pepita@correo.com');
-
-
-
-
--- borrar
-INSERT INTO rol_tiene_permiso
-	(id_rol, id_permiso)
+	(11111111, 'Pepito', 'Muchos Usuarios', 'Falso 111', 08001111, 'pepito@correo.com'),
+	(22222222, 'Pepita', 'Mesera de Ayuda', 'Falso 222', 08002222, 'pepita@correo.com'),
+	(33333333, 'Robertito', 'El Contador', 'Falso 333', 08003333, 'robertito@correo.com'),
+	(44444444, 'Robertita', 'Supervisora de Operaciones', 'Falso 444', 08004444, 'robertita@correo.com'),
+	(55555555, 'Mafalda', 'Muchos Roles', 'Falso 555', 08005555, 'mafalda@correo.com'),
+	(66666666, 'Un', 'Inutil', 'Falso 000', 08000000, 'uninutil@correo.com'),
+	(77777777, 'Una', 'Inutil', 'Falso 000', 08000001, 'unainutil@correo.com');
+	
+INSERT INTO usuarios
+	(usuario, contraseña, documento)
 VALUES
-	(1, 1),
-	(1, 2),
-	(2, 2),
-	(3, 3),
-	(4, 4),
-	(4, 5),
-	(5, 5);
--- borrar
+	('pepitoAdmin', '1234', 11111111),
+	('pepitoMesa', '1234', 11111111),
+	('pepitoConta', '1234', 11111111),
+	('pepitoSuper', '1234', 11111111),
+	('pepitoOper', '1234', 11111111),
+	('pepita', '1234', 22222222),
+	('robertito', '1234', 33333333),
+	('robertita', '1234', 44444444),
+	('mafalda', '1234', 55555555);
+
 INSERT INTO usuario_tiene_rol
 	(id_usuario, id_rol)
 VALUES
-	(1, 1),
-	(2, 2),
-	(3, 3),
-	(4, 4),
-	(5, 5),
-	(7, 3),
-	(7, 4),
-	(7, 5),
-	(6, 5);
+	(1, 1), -- u: pepitoAdmin 	r: Administrador
+	(2, 2), -- u: pepitoMesa	r: Mesa de Ayuda
+	(3, 3), -- u: pepitoConta 	r: Contador
+	(4, 4), -- u: pepitoSuper	r: Supervisor Operaciones
+	(5, 5), -- u: pepitoOper	r: Operador
+	(6, 2), -- u: pepita		r: Mesa de Ayuda
+	(7, 3), -- u: robertito		r: Contador
+	(8, 4), -- u: robertita		r: Supervisor Operaciones
+	(8, 5), -- u: robertita		r: Operador
+	(9, 1), -- u: mafalda		r: Administrador
+	(9, 2), -- u: mafalda		r: Mesa de Ayuda
+	(9, 3), -- u: mafalda		r: Contador
+	(9, 4), -- u: mafalda		r: Supervisor Operaciones
+	(9, 5); -- u: mafalda		r: Operador
 
---  Update de testing
+INSERT INTO rol_tiene_permiso
+	(id_rol, id_permiso)
+VALUES
+	(1, 1), -- r: Administrador				p: Configuración del Sistema
+	(1, 2), -- r: Administrador				p: Alta Usuarios
+	(1, 3), -- r: Administrador				p: Baja Usuarios
+	(1, 4), -- r: Administrador				p: Modificar Usuarios
+	(1, 5), -- r: Administrador				p: Desbloquear Usuario
+	(1, 6), -- r: Administrador				p: Bloquear Usuario
+	(2, 2), -- r: Mesa de Ayuda				p: Alta Usuarios
+	(2, 5), -- r: Mesa de Ayuda				p: Desbloquear Usuario
+	(2, 6), -- r: Mesa de Ayuda				p: Bloquear Usuario
+	(3, 7), -- r: Contador					p: Desbloquear Usuario
+	(4, 5), -- r: Supervisor Operaciones 	p: Desbloquear Usuario
+	(4, 6), -- r: Supervisor Operaciones 	p: Bloquear Usuario
+	(4, 8), -- r: Supervisor Operaciones 	p: Operar
+	(5, 8); -- r: Operador					p: Operar
+
+-- Consultas SQL Select para verificar datos
+
+-- select * from usuarios;
+-- select * from personas;
+-- select * from permisos;
+-- select * from usuario_tiene_rol;
+-- select * from rol_tiene_permiso;
